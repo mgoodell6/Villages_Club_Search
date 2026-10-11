@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font-size="normal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Villages Clubs & Activities Search</title>
+  <meta name="description" content="Search and discover clubs and lifestyle activities across all Recreation Centers in The Villages, FL. Filter by location, meeting day, week of the month, and time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css?v=3">
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">⛳</div>
+        <div class="brand-text">
+          <h1 class="brand-title">The Villages Club Finder</h1>
+          <p class="brand-subtitle">Resident Lifestyle Clubs & Activities Directory</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Font Size Adjuster for Accessibility -->
+        <div class="font-scaler" title="Adjust Text Size">
+          <span class="control-label">Text:</span>
+          <button id="font-sm-btn" class="font-btn" data-size="small" title="Normal text">A</button>
+          <button id="font-md-btn" class="font-btn active" data-size="normal" title="Large text">A+</button>
+          <button id="font-lg-btn" class="font-btn" data-size="large" title="Extra large text">A++</button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="icon-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+
+        <!-- Update / Upload PDF Modal Trigger -->
+        <button id="open-upload-btn" class="btn btn-outline" title="Update Club-Contact PDF">
+          <span class="btn-icon">📄</span> Update PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+      <div class="nav-container">
+        <button id="tab-search" class="nav-tab active" data-tab="search-view">
+          <span class="nav-icon">🔍</span> Search Clubs
+        </button>
+        <button id="tab-locations" class="nav-tab" data-tab="locations-view">
+          <span class="nav-icon">📍</span> Browse by Location <span id="locations-badge" class="badge">79</span>
+        </button>
+        <button id="tab-favorites" class="nav-tab" data-tab="favorites-view">
+          <span class="nav-icon">⭐</span> My Saved Clubs <span id="favorites-badge" class="badge">0</span>
+        </button>
+        <button id="tab-guide" class="nav-tab" data-tab="guide-view">
+          <span class="nav-icon">💡</span> Meeting Code Guide
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="main-content">
+    
+    <!-- TAB 1: Search & Filter View -->
+    <section id="search-view" class="tab-pane active">
+      <!-- Search & Filters Card -->
+      <div class="search-filters-card">
+        <!-- Primary Search Input -->
+        <div class="primary-search-row">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="global-search-input" placeholder="Search clubs by name, activity, leader, keyword, or room code..." autocomplete="off">
+            <button id="clear-search-btn" class="clear-btn" title="Clear search" style="display: none;">✕</button>
+          </div>
+          <button id="reset-all-filters-btn" class="btn btn-secondary">
+            Reset Filters
+          </button>
+        </div>
+
+        <!-- Location Filter (Multi-select) -->
+        <div class="filter-section location-filter-section">
+          <div class="filter-header">
+            <label class="filter-label">
+              <span class="filter-icon">📍</span> Meeting Location (Select One or More Centers):
+            </label>
+            <div class="location-header-actions">
+              <button type="button" id="clear-selected-locations-btn" class="btn-text-action" style="display: none;">Clear Locations</button>
+              <span id="location-active-hint" class="filter-hint">All 79 Centers</span>
+            </div>
+          </div>
+
+          <div class="location-multiselect-container">
+            <!-- Custom Multi-select Dropdown -->
+            <div class="multiselect-wrapper" id="location-multiselect-wrapper">
+              <button type="button" id="location-dropdown-toggle" class="multiselect-toggle-btn" aria-haspopup="true" aria-expanded="false">
+                <span class="multiselect-toggle-icon">📍</span>
+                <span id="location-toggle-label" class="multiselect-toggle-text">All Recreation Centers (3,205 Clubs)</span>
+                <span class="multiselect-toggle-arrow">▼</span>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div id="location-dropdown-menu" class="multiselect-dropdown-menu" style="display: none;">
+                <div class="dropdown-search-box">
+                  <span class="dropdown-search-icon">🔍</span>
+                  <input type="text" id="location-filter-search" placeholder="Search centers (e.g. Sawgrass, Olympia, Eisenhower)..." autocomplete="off">
+                  <button type="button" id="clear-location-search-btn" class="clear-search-btn" style="display: none;">✕</button>
+                </div>
+
+                <div class="dropdown-actions-row">
+                  <button type="button" id="select-all-locations-btn" class="btn-action-link">Select All</button>
+                  <button type="button" id="deselect-all-locations-btn" class="btn-action-link">Clear Selection</button>
+                  <span id="dropdown-selection-counter" class="dropdown-counter">0 selected</span>
+                </div>
+
+                <div id="location-checkbox-list" class="location-checkbox-list" role="listbox">
+                  <!-- Checkbox items populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <button type="button" id="switch-to-locations-tab-btn" class="btn btn-sm btn-ghost" title="View all centers as a visual directory">
+              Browse Centers Grid →
+            </button>
+          </div>
+
+          <!-- Selected Location Chips (Pills with remove button) -->
+          <div id="selected-locations-chips" class="selected-locations-chips" style="display: none;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Day of the Week Filter -->
+        <div class="filter-section">
+          <label class="filter-label"><span class="filter-icon">📅</span> Day of the Week:</label>
+          <div class="pill-group" id="day-pill-group">
+            <button class="pill-btn active" data-day="all">Any Day</button>
+            <button class="pill-btn" data-day="Monday">Monday</button>
+            <button class="pill-btn" data-day="Tuesday">Tuesday</button>
+            <button class="pill-btn" data-day="Wednesday">Wednesday</button>
+            <button class="pill-btn" data-day="Thursday">Thursday</button>
+            <button class="pill-btn" data-day="Friday">Friday</button>
+            <button class="pill-btn" data-day="Saturday">Saturday</button>
+            <button class="pill-btn" data-day="Sunday">Sunday</button>
+          </div>
+        </div>
+
+        <!-- Secondary Filters Row (Frequency & Time of Day) -->
+        <div class="filters-row">
+          <!-- Frequency / Week of the Month -->
+          <div class="filter-col">
+            <label class="filter-label"><span class="filter-icon">🔢</span> Meeting Frequency:</label>
+            <div class="pill-group" id="week-pill-group">
+              <button class="pill-btn active" data-week="all">All Weeks</button>
+              <button class="pill-btn" data-week="Every week">Every Week (Q)</button>
+              <button class="pill-btn" data-week="1st">1st</button>
+              <button class="pill-btn" data-week="2nd">2nd</button>
+              <button class="pill-btn" data-week="3rd">3rd</button>
+              <button class="pill-btn" data-week="4th">4th</button>
+              <button class="pill-btn" data-week="5th">5th</button>
+            </div>
+          </div>
+
+          <!-- Time of Day -->
+          <div class="filter-col">
+            <label class="filter-label"><span class="filter-icon">⏰</span> Time of Day:</label>
+            <div class="pill-group" id="period-pill-group">
+              <button class="pill-btn active" data-period="all">Any Time</button>
+              <button class="pill-btn" data-period="Morning">Morning (< 12 PM)</button>
+              <button class="pill-btn" data-period="Afternoon">Afternoon (12-5 PM)</button>
+              <button class="pill-btn" data-period="Evening">Evening (5 PM+)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Header & View Toggle -->
+      <div class="results-toolbar">
+        <div class="results-summary">
+          <span id="results-count-text">Showing <strong>0</strong> clubs</span>
+          <span id="active-filter-tags" class="active-tags-container"></span>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="view-toggle">
+            <button id="view-cards-btn" class="toggle-btn active" title="Card View">
+              🗂️ Cards
+            </button>
+            <button id="view-table-btn" class="toggle-btn" title="Dense Table View">
+              📄 Table
+            </button>
+          </div>
+          <button id="print-results-btn" class="btn btn-sm btn-outline" title="Print Current Club Results">
+            🖨️ Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Container (Cards) -->
+      <div id="clubs-grid" class="clubs-grid">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+      <!-- Results Container (Table View) -->
+      <div id="clubs-table-container" class="clubs-table-wrapper" style="display: none;">
+        <table class="clubs-table" id="clubs-table">
+          <thead>
+            <tr>
+              <th>Club / Activity</th>
+              <th>Location</th>
+              <th>When It Meets</th>
+              <th>Meeting Time</th>
+              <th>Leader / Contact</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clubs-table-body">
+            <!-- Rendered via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="no-results-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">🔍</div>
+        <h3>No matching clubs found</h3>
+        <p>Try adjusting your search keywords, clearing your location filter, or selecting "Any Day".</p>
+        <button id="empty-reset-btn" class="btn btn-primary">Reset All Filters</button>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div id="pagination-controls" class="pagination-container">
+        <button id="prev-page-btn" class="btn btn-outline" disabled>← Previous Page</button>
+        <div id="page-info" class="page-info">Page 1 of 1</div>
+        <button id="next-page-btn" class="btn btn-outline">Next Page →</button>
+      </div>
+    </section>
+
+    <!-- TAB 2: Browse by Location Directory -->
+    <section id="locations-view" class="tab-pane">
+      <div class="section-intro">
+        <h2>Recreation Centers Directory</h2>
+        <p>Browse all <strong>79 Recreation Centers</strong> below. Click any center card to add or remove it from your search filter.</p>
+        <div class="location-dir-controls">
+          <div class="location-search-wrapper">
+            <input type="text" id="location-directory-search" placeholder="Filter recreation centers by name..." class="input-search-location">
+          </div>
+          <div class="dir-actions-group">
+            <span id="dir-selected-count" class="dir-selected-badge">0 Centers Selected</span>
+            <button type="button" id="dir-view-selected-btn" class="btn btn-sm btn-primary" style="display: none;">View Selected Clubs in Search →</button>
+            <button type="button" id="dir-clear-selected-btn" class="btn btn-sm btn-ghost" style="display: none;">Clear Selection</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="locations-directory-grid" class="locations-directory-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB 3: My Saved Clubs -->
+    <section id="favorites-view" class="tab-pane">
+      <div class="favorites-header">
+        <div>
+          <h2>My Saved Clubs & Schedule</h2>
+          <p>Clubs you have starred are saved here on your device for quick reference.</p>
+        </div>
+        <div class="favorites-actions">
+          <button id="export-favorites-csv-btn" class="btn btn-outline">📥 Export to CSV</button>
+          <button id="print-favorites-btn" class="btn btn-primary">🖨️ Print My Schedule</button>
+          <button id="clear-favorites-btn" class="btn btn-ghost text-danger">Clear All</button>
+        </div>
+      </div>
+
+      <div id="favorites-grid" class="clubs-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div id="no-favorites-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">⭐</div>
+        <h3>No saved clubs yet</h3>
+        <p>Click the star icon (⭐) on any club card in the search results to add it to your personal schedule.</p>
+        <button id="browse-clubs-btn" class="btn btn-primary">Browse Clubs Now</button>
+      </div>
+    </section>
+
+    <!-- TAB 4: Meeting Code Guide -->
+    <section id="guide-view" class="tab-pane">
+      <div class="guide-content-card">
+        <h2>How to Read Villages Club Meeting Codes</h2>
+        <p class="guide-intro">
+          In The Villages club lists, meeting schedules are encoded into shorthand at the end of each club name (e.g. <code>2,4W@3PM-LU</code>). Our application automatically translates these into plain English, but here is how the codes work:
+        </p>
+
+        <div class="guide-grid">
+          <div class="guide-item">
+            <div class="guide-token">Q</div>
+            <h4>Every Week</h4>
+            <p><strong>Q</strong> means <em>Every</em> week. For example, <code>QF@6PM</code> meets every Friday at 6:00 PM.</p>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-token">1, 2, 3, 4, 5</div>
+            <h4>Week of the Month</h4>
+            <p>Indicates which week(s) each month. <code>2,4W</code> means the 2nd and 4th Wednesday. <code>1M</code> means the 1st Monday.</p>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-token">M - SU</div>
+            <h4>Day of the Week</h4>
+            <p><strong>M</strong> = Monday, <strong>TU</strong> = Tuesday, <strong>W</strong> = Wednesday, <strong>TH</strong> = Thursday, <strong>F</strong> = Friday, <strong>SA</strong> = Saturday, <strong>SU</strong> = Sunday.</p>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-token">@Time</div>
+            <h4>Start Time</h4>
+            <p>Indicates when the meeting begins, such as <code>@9AM</code>, <code>@11:30AM</code>, or <code>@6PM</code>.</p>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-token">-XX</div>
+            <h4>Facility / Room Code</h4>
+            <p>Abbreviation of the recreation center or room, such as <code>-LU</code> (Laurel Manor), <code>-CC</code> (Colony Cottage), or <code>-LH</code> (La Hacienda).</p>
+          </div>
+
+          <div class="guide-item">
+            <div class="guide-token">x / even / odd</div>
+            <h4>Exceptions & Months</h4>
+            <p><code>x7,8</code> means <em>except</em> July and August. <code>2Meven</code> means 2nd Monday of even months only.</p>
+          </div>
+        </div>
+
+        <div class="interactive-decoder-box">
+          <h3>Interactive Code Decoder</h3>
+          <p>Curious about a specific code from a flyer or paper? Type it below to decode it:</p>
+          <div class="decoder-input-row">
+            <input type="text" id="custom-code-input" placeholder="e.g. 2,4W@3PM-LU or QF@6PM-CO" class="decoder-input">
+            <button id="decode-code-btn" class="btn btn-primary">Decode Code</button>
+          </div>
+          <div id="decoder-result-box" class="decoder-result" style="display: none;">
+            <!-- Output -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>The Villages Lifestyle Clubs & Activity Directory • Data extracted from <span id="footer-source-name">Club-Contact-9.11.26.pdf</span> (<span id="footer-total-clubs">3,205</span> clubs)</p>
+      <p class="footer-sub">Updated: <span id="footer-last-updated">Recently</span> • Always verify room schedules with your local Recreation Center Director.</p>
+    </div>
+  </footer>
+
+  <!-- PDF Update / Upload Modal -->
+  <div id="upload-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">📄 Update Club Directory PDF</h3>
+        <button id="close-upload-modal-btn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Upload a new <code>Club-Contact-*.pdf</code> file released by The Villages Recreation Department. The system will automatically parse and update all 3,200+ clubs in seconds.</p>
+        
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone-icon">📁</div>
+          <p class="drop-zone-text"><strong>Click to choose a PDF</strong> or drag and drop it here</p>
+          <span class="drop-zone-hint">Accepts .pdf files up to 32MB</span>
+          <input type="file" id="pdf-file-input" accept=".pdf" style="display: none;">
+        </div>
+
+        <div id="upload-progress-container" style="display: none;" class="upload-progress">
+          <div class="progress-bar-bg">
+            <div id="upload-progress-bar" class="progress-bar-fill"></div>
+          </div>
+          <p id="upload-status-text" class="status-text">Uploading and extracting clubs...</p>
+        </div>
+
+        <div id="upload-result-alert" class="alert" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-upload-btn" class="btn btn-secondary">Cancel</button>
+        <button id="start-upload-btn" class="btn btn-primary" disabled>Start Extraction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Club Detail / Code Breakdown Modal -->
+  <div id="detail-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card modal-detail">
+      <div class="modal-header">
+        <h3 id="modal-club-name" class="modal-title">Club Name</h3>
+        <button id="close-detail-modal-btn" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-club-body">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button id="modal-save-fav-btn" class="btn btn-outline">⭐ Save to My Clubs</button>
+        <button id="modal-close-btn" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js?v=3"></script>
+</body>
+</html>
